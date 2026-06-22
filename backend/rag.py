@@ -4,13 +4,6 @@ from dotenv import load_dotenv
 from langchain_community.document_loaders import PyPDFLoader
 from langchain_text_splitters import RecursiveCharacterTextSplitter
 from langchain_chroma import Chroma
-from langchain_google_genai import GoogleGenerativeAIEmbeddings, ChatGoogleGenerativeAI
-
-from langchain_ollama import OllamaEmbeddings
-from langchain_google_genai import ChatGoogleGenerativeAI
-
-from langchain_ollama import OllamaEmbeddings
-from langchain_groq import ChatGroq
 
 from langchain_huggingface import HuggingFaceEmbeddings
 from langchain_groq import ChatGroq
