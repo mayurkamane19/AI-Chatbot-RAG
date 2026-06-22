@@ -1,5 +1,5 @@
 from fastapi import FastAPI
-from rag import create_vector_db, ask_question
+from backend.rag import create_vector_db, ask_question
 
 app = FastAPI()
 
