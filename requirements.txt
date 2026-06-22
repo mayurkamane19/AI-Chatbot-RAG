@@ -1,10 +1,10 @@
 fastapi
 uvicorn
 langchain
-langchain-google-genai
 langchain-chroma
 chromadb
 pypdf
 python-dotenv
 langchain-groq
-langchain-ollama
+langchain-huggingface
+sentence-transformers

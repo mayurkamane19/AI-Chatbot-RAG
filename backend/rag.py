@@ -12,12 +12,15 @@ from langchain_google_genai import ChatGoogleGenerativeAI
 from langchain_ollama import OllamaEmbeddings
 from langchain_groq import ChatGroq
 
+from langchain_huggingface import HuggingFaceEmbeddings
+from langchain_groq import ChatGroq
+
 load_dotenv()
 
 DB_PATH = "db"
 
-EMBEDDINGS = OllamaEmbeddings(
-    model="nomic-embed-text"
+EMBEDDINGS = HuggingFaceEmbeddings(
+    model_name="sentence-transformers/all-MiniLM-L6-v2"
 )
 
 LLM = ChatGroq(
