@@ -12,9 +12,12 @@ load_dotenv()
 
 DB_PATH = "db"
 
-EMBEDDINGS = HuggingFaceEmbeddings(
-    model_name="sentence-transformers/all-MiniLM-L6-v2"
-)
+EMBEDDINGS = None
+
+def get_embeddings():
+    return HuggingFaceEmbeddings(
+        model_name="sentence-transformers/all-MiniLM-L6-v2"
+    )
 
 LLM = ChatGroq(
     model_name="llama-3.1-8b-instant",
@@ -46,10 +49,10 @@ def create_vector_db():
         print(f"Total chunks: {len(split_docs)}")
 
         db = Chroma.from_documents(
-            documents=split_docs,
-            embedding=EMBEDDINGS,
-            persist_directory=DB_PATH
-        )
+    documents=split_docs,
+    embedding=get_embeddings(),
+    persist_directory=DB_PATH
+)
 
         print("Vector DB created successfully")
         return db
@@ -62,9 +65,9 @@ def load_db():
 
     if DB is None:
         DB = Chroma(
-            persist_directory=DB_PATH,
-            embedding_function=EMBEDDINGS
-        )
+    persist_directory=DB_PATH,
+    embedding_function=get_embeddings()
+)
 
     return DB
 
