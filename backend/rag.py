@@ -2,102 +2,64 @@ import os
 from dotenv import load_dotenv
 
 from langchain_community.document_loaders import PyPDFLoader
-from langchain_text_splitters import RecursiveCharacterTextSplitter
-from langchain_chroma import Chroma
-
-from langchain_huggingface import HuggingFaceEmbeddings
 from langchain_groq import ChatGroq
 
 load_dotenv()
-
-DB_PATH = "db"
-
-EMBEDDINGS = None
-
-def get_embeddings():
-    return HuggingFaceEmbeddings(
-        model_name="sentence-transformers/all-MiniLM-L6-v2"
-    )
 
 LLM = ChatGroq(
     model_name="llama-3.1-8b-instant",
     temperature=0
 )
 
-DB = None
+PDF_TEXT = ""
+
 
 def create_vector_db():
+    global PDF_TEXT
+
     try:
-        BASE_DIR = os.path.dirname(os.path.abspath(__file__))
-        pdf_path = os.path.join(BASE_DIR, "data", "pdf_checker.pdf")
+        base_dir = os.path.dirname(os.path.abspath(__file__))
+        pdf_path = os.path.join(base_dir, "data", "pdf_checker.pdf")
 
         if not os.path.exists(pdf_path):
-            raise FileNotFoundError(f"PDF not found at: {pdf_path}")
+            raise FileNotFoundError(
+                f"PDF not found at: {pdf_path}"
+            )
 
         loader = PyPDFLoader(pdf_path)
         docs = loader.load()
 
-        print(f"Loaded {len(docs)} pages")
-
-        splitter = RecursiveCharacterTextSplitter(
-            chunk_size=800,
-            chunk_overlap=100
+        PDF_TEXT = "\n\n".join(
+            [doc.page_content for doc in docs]
         )
 
-        split_docs = splitter.split_documents(docs)
+        print(f"Loaded {len(docs)} pages successfully")
 
-        print(f"Total chunks: {len(split_docs)}")
-
-        db = Chroma.from_documents(
-    documents=split_docs,
-    embedding=get_embeddings(),
-    persist_directory=DB_PATH
-)
-
-        print("Vector DB created successfully")
-        return db
+        return True
 
     except Exception as e:
-        print("Error in create_vector_db:", e)
+        print("Error:", e)
         raise e
-def load_db():
-    global DB
-
-    if DB is None:
-        DB = Chroma(
-    persist_directory=DB_PATH,
-    embedding_function=get_embeddings()
-)
-
-    return DB
 
 
 def ask_question(query: str):
+    global PDF_TEXT
+
     try:
-        db = load_db()
+        if PDF_TEXT == "":
+            create_vector_db()
 
-        retriever = db.as_retriever(
-            search_kwargs={"k": 3}
-        )
-
-        docs = retriever.invoke(query)
-
-        if not docs:
-            return "I don't know based on the provided data."
-
-        context = "\n\n".join(
-            [doc.page_content for doc in docs]
-        )
+        context = PDF_TEXT[:12000]
 
         prompt = f"""
 You are an AI customer support assistant.
 
 Rules:
-- Answer ONLY from the given context
-- If answer is not present, say:
+- Answer ONLY from the given context.
+- If the answer is not present in the context, say:
   "I don't know based on the provided data."
-- Keep answer short and clear
-- Do NOT use outside knowledge
+- Keep answers short and clear.
+- Do NOT use outside knowledge.
 
 Context:
 {context}
