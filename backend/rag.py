@@ -52,18 +52,12 @@ def load_uploaded_pdf(pdf_path):
             [doc.page_content for doc in docs]
         )
 
-        print(
-            f"Uploaded PDF loaded successfully ({len(docs)} pages)"
-        )
-
+        print("================================")
         print("CURRENT PDF LENGTH:", len(PDF_TEXT))
-        print(PDF_TEXT[:500])
+        print(PDF_TEXT[:1000])
+        print("================================")
 
         return True
-
-    except Exception as e:
-        print("Upload Error:", e)
-        raise e
 
     except Exception as e:
         print("Upload Error:", e)
