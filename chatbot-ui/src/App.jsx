@@ -1,10 +1,11 @@
-import { useState } from "react";
+import { useState, useEffect, useRef } from "react";
 
 function App() {
   const [query, setQuery] = useState("");
   const [messages, setMessages] = useState([]);
   const [loading, setLoading] = useState(false);
   const [pdfFile, setPdfFile] = useState(null);
+  const chatEndRef = useRef(null);
 
   const askQuestion = async () => {
     if (!query.trim()) return;
@@ -52,6 +53,44 @@ function App() {
     }
   };
 
+  useEffect(() => {
+  const saved = localStorage.getItem("chat_history");
+
+  if (saved) {
+    setMessages(JSON.parse(saved));
+  }
+}, []);
+
+useEffect(() => {
+  localStorage.setItem(
+    "chat_history",
+    JSON.stringify(messages)
+  );
+
+  chatEndRef.current?.scrollIntoView({
+    behavior: "smooth",
+  });
+}, [messages]);
+
+const downloadChat = () => {
+  const text = messages
+    .map(
+      (m) => `${m.type.toUpperCase()}: ${m.text}`
+    )
+    .join("\n\n");
+
+  const blob = new Blob([text], {
+    type: "text/plain",
+  });
+
+  const url = URL.createObjectURL(blob);
+
+  const a = document.createElement("a");
+  a.href = url;
+  a.download = "chat-history.txt";
+  a.click();
+};
+
   return (
     <div
       style={{
@@ -92,7 +131,9 @@ function App() {
         ...prev,
         {
           type: "bot",
-          text: data.message,
+          text: `✅ PDF Uploaded Successfully
+
+📄 ${file.name}`,
         },
       ]);
     } catch (err) {
@@ -100,6 +141,32 @@ function App() {
     }
   }}
 />
+
+<div
+  style={{
+    textAlign: "center",
+    marginBottom: "15px",
+  }}
+>
+  <button
+    onClick={() => setMessages([])}
+    style={{
+      marginRight: "10px",
+      padding: "10px",
+    }}
+  >
+    Clear Chat
+  </button>
+
+  <button
+    onClick={downloadChat}
+    style={{
+      padding: "10px",
+    }}
+  >
+    Download Chat
+  </button>
+</div>
 
         {pdfFile && (
           <p>
@@ -133,16 +200,20 @@ function App() {
             }}
           >
             <div
-              style={{
-                background:
-                  msg.type === "user"
-                    ? "#2563eb"
-                    : "#334155",
-                padding: "12px",
-                borderRadius: "12px",
-                maxWidth: "70%",
-              }}
-            >
+  style={{
+    background:
+      msg.type === "user"
+        ? "#2563eb"
+        : "#334155",
+    padding: "15px",
+    fontSize: "15px",
+    lineHeight: "1.6",
+    boxShadow:
+      "0 2px 10px rgba(0,0,0,0.3)",
+    borderRadius: "12px",
+    maxWidth: "70%",
+  }}
+>
               {msg.text}
             </div>
           </div>
@@ -159,6 +230,7 @@ function App() {
           </div>
         )}
       </div>
+      <div ref={chatEndRef}></div>
 
       {/* Input Area */}
       <div
