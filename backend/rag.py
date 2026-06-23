@@ -34,11 +34,32 @@ def create_vector_db():
         )
 
         print(f"Loaded {len(docs)} pages successfully")
-
         return True
 
     except Exception as e:
         print("Error:", e)
+        raise e
+
+
+def load_uploaded_pdf(pdf_path):
+    global PDF_TEXT
+
+    try:
+        loader = PyPDFLoader(pdf_path)
+        docs = loader.load()
+
+        PDF_TEXT = "\n\n".join(
+            [doc.page_content for doc in docs]
+        )
+
+        print(
+            f"Uploaded PDF loaded successfully ({len(docs)} pages)"
+        )
+
+        return True
+
+    except Exception as e:
+        print("Upload Error:", e)
         raise e
 
 
