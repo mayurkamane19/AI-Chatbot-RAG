@@ -1,7 +1,7 @@
-from fastapi import FastAPI
+from fastapi import FastAPI, UploadFile, File
 from fastapi.middleware.cors import CORSMiddleware
 
-from backend.rag import create_vector_db, ask_question
+from backend.rag import create_vector_db, ask_question, load_uploaded_pdf
 
 app = FastAPI()
 
@@ -15,14 +15,27 @@ app.add_middleware(
 
 @app.get("/")
 def home():
-    return {"message": "Ollama Chatbot Running 🚀"}
+    return {"message": "AI PDF Chatbot Running 🚀"}
 
-@app.get("/setup")
-def setup():
-    create_vector_db()
-    return {"message": "Vector DB created"}
+@app.post("/upload-pdf")
+async def upload_pdf(file: UploadFile = File(...)):
+    content = await file.read()
+
+    temp_path = "uploaded.pdf"
+
+    with open(temp_path, "wb") as f:
+        f.write(content)
+
+    load_uploaded_pdf(temp_path)
+
+    return {"message": "PDF uploaded successfully"}
 
 @app.get("/chat")
 def chat(query: str):
-    response = ask_question(query)
-    return {"response": response}
+    return {"response": ask_question(query)}
+
+from backend.rag import (
+    create_vector_db,
+    ask_question,
+    load_uploaded_pdf
+)
